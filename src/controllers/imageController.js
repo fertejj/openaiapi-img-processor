@@ -2,12 +2,25 @@ import { processImage } from '../services/aiService.js';
 
 export const uploadAndProcessImage = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No image file provided' });
+        const { image } = req.body;
+
+        if (!image) {
+            return res.status(400).json({ error: 'No image data provided' });
         }
 
-        const base64Image = req.file.buffer.toString('base64');
-        const mimeType = req.file.mimetype;
+        let base64Image = image;
+        let mimeType = 'image/jpeg'; // Default
+
+        // Check if it's a data URI
+        if (image.startsWith('data:')) {
+            const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+            if (matches && matches.length === 3) {
+                mimeType = matches[1];
+                base64Image = matches[2];
+            } else {
+                return res.status(400).json({ error: 'Invalid image format' });
+            }
+        }
 
         const description = await processImage(base64Image, mimeType);
 

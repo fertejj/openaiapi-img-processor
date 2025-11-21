@@ -1,5 +1,5 @@
 import express from 'express';
-import upload from '../middleware/upload.js';
+// import upload from '../middleware/upload.js'; // No longer needed
 import { uploadAndProcessImage } from '../controllers/imageController.js';
 import { getPrompt, updatePrompt } from '../controllers/configController.js';
 
@@ -14,13 +14,14 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               image:
  *                 type: string
- *                 format: binary
+ *                 description: Base64 encoded image or Data URI
+ *                 example: "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
  *     responses:
  *       200:
  *         description: The image description
@@ -34,11 +35,11 @@ const router = express.Router();
  *                 description:
  *                   type: string
  *       400:
- *         description: Bad request (no file)
+ *         description: Bad request (no image data)
  *       500:
  *         description: Server error
  */
-router.post('/process-image', upload.single('image'), uploadAndProcessImage);
+router.post('/process-image', uploadAndProcessImage);
 
 /**
  * @swagger
